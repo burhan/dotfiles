@@ -1,0 +1,222 @@
+call plug#begin()
+Plug 'vim-airline/vim-airline'
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+Plug 'vim-airline/vim-airline-themes'
+Plug 'majutsushi/tagbar'
+Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'chrisbra/csv.vim'
+Plug 'edkolev/promptline.vim'
+Plug 'jmcantrell/vim-virtualenv'
+Plug 'vim-ctrlspace/vim-ctrlspace'
+Plug 'luochen1990/rainbow'
+Plug 'pangloss/vim-javascript'
+Plug 'ryanoasis/vim-devicons'
+Plug 'neomake/neomake'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+Plug 'SirVer/ultisnips'
+Plug 'AndrewRadev/splitjoin.vim'
+call plug#end()
+
+let mapleader = ","
+
+" vim-go
+let g:go_highlight_types = 1
+let g:go_highlight_fields = 1
+let g:go_highlight_functions = 1
+let g:go_highlight_function_calls = 1
+let g:go_highlight_operators = 1
+let g:go_highlight_extra_types = 1
+let g:go_textobj_include_function_doc = 1
+let g:go_fmt_command = "goimports"
+
+" run :GoBuild or :GoTestCompile based on the go file
+function! s:build_go_files()
+    let l:file = expand('%')
+    if l:file =~# '^\f\+_test\.go$'
+        call go#test#TEst(0, 1)
+    elseif l:file =~# '^\f\+\.go$'
+        call go#cmd#Build(0)
+    endif
+endfunction
+
+autocmd FileType go nmap <leader>b :<C-u>call <SID>build_go_files()<CR>
+
+
+" airline tweaks
+let g:airline_theme='luna'
+let g:airline_powerline_fonts=1
+let g:airline#extensions#tabline#enabled=1
+let g:airline#extensions#tabline#formatter='unique_tail_improved'
+
+autocmd ColorScheme * highlight ColorColumn guifg=#ffffff guibg=#303030 ctermbg=238 "custom colorcolumn color
+
+" Required for CtrlSpace
+set nocompatible
+set hidden
+set showtabline=0
+
+set encoding=utf-8 "UTF-8 character encoding
+set tabstop=4  "4 space tabs
+set shiftwidth=4  "4 space shift
+set softtabstop=4  "Tab spaces in no hard tab mode
+set expandtab  " Expand tabs into spaces
+set autoindent  "autoindent on new lines
+set showmatch  "Highlight matching braces
+set ruler  "Show bottom ruler
+set equalalways  "Split windows equal size
+set formatoptions+=croq  "Enable comment line auto formatting
+set textwidth=80 "80-column text formatting
+set wildignore+=*.o,*.obj,*.class,*.swp,*.pyc,node_modules "Ignore junk files
+set title  "Set window title to file
+set hlsearch  "Highlight on search
+set ignorecase  "Search ignoring case
+set smartcase  "Search using smartcase
+set incsearch  "Start searching immediately
+set scrolloff=5  "Never scroll off
+set wildmode=longest,list  "Better unix-like tab completion
+set cursorline  "Highlight current line
+set lazyredraw  "Don't redraw while running macros (faster)
+set autochdir  "Change directory to currently open file
+set linebreak  "Only wrap on 'good' characters for wrapping
+set backspace=indent,eol,start  "Better backspacing
+set linebreak  "Intelligently wrap long files
+set nostartofline "Vertical movement preserves horizontal position
+set number "Line numbers
+set relativenumber "Relative line numbers
+set conceallevel=1 "Enable concealing characters
+set nowrap "Don't wrap lines
+set sidescroll=1 "Smooth scrolling
+set listchars=extends:,precedes: "Overflow indicators
+set sidescrolloff=1 "Keep cursor from scrolling onto overflow indicator
+set mouse=a "Enable mouse support
+
+
+" C-indenting:
+" - open/close () aligned to outer context
+" - do not add extra indent for scope declarations
+" - indent Java/JS inline funcs/classes correctly
+set cinoptions=(0,Ws,m1,g0,j1,J1
+let g:javascript_indent_W_pat = '[^[:blank:]{[]'
+
+set showtabline=2 "File tabs always visible
+
+" Turn on/off relative line numbers automatically
+augroup numbertoggle
+    autocmd!
+    autocmd WinEnter,FocusGained,InsertLeave * set relativenumber
+    autocmd WinLeave,FocusLost,InsertEnter   * set norelativenumber
+augroup END
+
+let mapleader = "\<Space>"
+let g:mapleader = "\<Space>"
+
+nnoremap <silent> <leader>T :tabprevious<cr>
+nnoremap <silent> <leader>t :tabnext<cr>
+nnoremap <silent> <C-t> :tabnew<cr>
+
+" Rebind moving around windows to Ctrl+{h,j,k,l}
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+if (!has("nvim"))
+	" vim-specific configs
+    set nocompatible  "Kill vi-compatibility
+    set ttyfast  "Speed up vim
+    set clipboard=unnamed  "Copy and paste from system clipboard
+else
+	" neovim-specific configs
+	tnoremap <C-h> <C-\><C-n><C-w>h
+    tnoremap <C-j> <C-\><C-n><C-w>j
+    tnoremap <C-k> <C-\><C-n><C-w>k
+    tnoremap <C-l> <C-\><C-n><C-w>l
+
+    if (exists('&inccommand'))
+        set inccommand=split
+    endif
+
+    " neomake settings
+    let g:neomake_javascript_enabled_makers = ['eslint']
+    let g:neomake_jsx_enabled_makers = ['eslint']
+    call neomake#configure#automake('nw', 500)
+
+    " deoplete-ternjs
+    let g:tern_request_timeout = 1
+
+    " deoplete
+    let g:deoplete#enable_at_startup = 1
+
+    inoremap <silent><expr> <TAB>
+                \ pumvisible() ? "\<C-n>" :
+                \ <SID>check_back_space() ? "\<TAB>" :
+                \ deoplete#mappings#manual_complete()
+    function! s:check_back_space() abort "{{{
+        let col = col('.') - 1
+        return !col || getline('.')[col - 1]  =~ '\s'
+    endfunction"}}}
+endif
+
+imap jk <Esc>
+"Fast saving
+nmap <leader>w :w!<cr>
+
+" Strip whitespace from end of lines when writing file
+function! <SID>StripTrailingWhitespaces()
+    if &filetype == 'diff'
+        return
+    endif
+
+    let l = line(".")
+    let c = col(".")
+    %s/\s\+$//e
+    call cursor(l, c)
+endfun
+
+autocmd BufWritePre * :call <SID>StripTrailingWhitespaces()
+
+" Syntax highlighting and stuff
+filetype plugin indent on
+syntax on
+
+" Get rid of warning on save/exit typo
+command WQ wq
+command Wq wq
+command W w
+command Q q
+
+" Highlight lines that are over 80 characters long
+" set colorcolumn=81
+
+" Always show status bar
+set laststatus=2
+
+" Don't show the mode
+set noshowmode
+
+" Copy on backup
+set backupcopy=yes
+
+" rainbow_parentheses.vim
+let g:rainbow_active=1
+
+" vim-javascript
+let g:javascript_enable_domhtmlcss = 1
+let g:javascript_conceal_function   = "ƒ"
+let g:javascript_conceal_null       = "ø"
+let g:javascript_conceal_this       = "@"
+let g:javascript_conceal_return     = "←"
+let g:javascript_conceal_undefined  = "¿"
+let g:javascript_conceal_prototype  = "¶"
+
+let g:jsx_ext_required = 0 " Allow JSX in normal JS files
+
+" ListToggle
+let g:lt_location_list_toggle_map = '<leader>ll'
+
+" loclist next/prev wraparound
+nnoremap <silent> <leader>ln :silent! try<bar>lnext<bar>catch /^Vim\%((\a\+)\)\=:E\(553\<bar>42\):/<bar>lfirst<bar>catch<bar>endtry<cr>
+nnoremap <silent> <leader>lN :silent! try<bar>lprev<bar>catch /^Vim\%((\a\+)\)\=:E\(553\<bar>42\):/<bar>llast<bar>catch<bar>endtry<cr>
+
+nmap <F8> :TagbarToggle<CR>

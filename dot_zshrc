@@ -1,0 +1,14 @@
+export PATH="${PATH}:${HOME}/.local/bin"
+HIST_STAMPS="yyyy-mm-dd"
+alias ls='ls -G'
+alias grep='grep --color'
+alias ll='ls -la'
+export PATH="$HOME/.cargo/bin:/Users/burhan/Library/Python/3.9/bin:/opt/homebrew/opt/gnu-sed/libexec/gnubin:$PATH"
+alias gitfetchall='git branch -r | grep -v "\->" | sed "s,\x1B\[[0-9;]*[a-zA-Z],,g" | while read remote; do git branch --track "${remote#origin/}" "$remote"; done'
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+export PATH="${HOME}/go/bin:${HOME}/work/tools/flutter/bin:/opt/homebrew/opt/libpq/bin:$PATH"
+eval "$(oh-my-posh init zsh --config 'https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/robbyrussel.omp.json')"
+source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+export ZSH_HIGHLIGHT_HIGHLIGHTERS_DIR=/opt/homebrew/share/zsh-syntax-highlighting/highlighters
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+eval "$(direnv hook zsh)"
